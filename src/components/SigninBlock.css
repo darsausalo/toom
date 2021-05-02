@@ -1,0 +1,11 @@
+@media all and (min-width: 480px) {
+    .Login {
+        padding: 60px;
+        text-align: center;
+    }
+
+    .Login form, .Login .nav-tab {
+        margin: 20px auto;
+        max-width: 520px;
+    }
+}
