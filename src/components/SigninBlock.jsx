@@ -23,8 +23,8 @@ function SigninBlock({onLogin, setAlertMessage}) {
 
             try {
                 const res = await axios.post("/user/signin", {email, password});
-                console.log(res);
                 setLoading(false);
+                onLogin(res.data);
             } catch (error) {
                 setLoading(false);
                 if (error.response.status === 404 || error.response.status === 403) {
@@ -88,7 +88,7 @@ function SignupBlock({setAlertMessage}) {
             setLoading(true);
 
             try {
-                const res = await axios.post("/user/signup", {email, fullname, password});
+                await axios.post("/user/signup", {email, fullname, password});
                 setAlertMessage("Вам отправлено письмо для подтверждения email. Пройдите по ссылке в письме, чтобы завершить регистрацию.", true);
                 setLoading(false);
             } catch (error) {

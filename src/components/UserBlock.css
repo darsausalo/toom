@@ -1,0 +1,33 @@
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    padding: 8px;
+}
+
+.messages {
+    flex: 1;
+    height: calc(100% - 155px);
+    max-height: 400px;
+    overflow: auto;
+}
+
+.message {
+    margin-bottom: 20px;
+}
+
+.message p {
+    display: inline-flex;
+    border-radius: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #7160ff;
+    padding: 10px 15px 15px;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.message span {
+    opacity: 0.5;
+    font-size: 14px;
+}
