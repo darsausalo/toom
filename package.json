@@ -1,9 +1,6 @@
 {
   "name": "toom",
   "version": "0.1.0",
-  "engines": {
-    "yarn": "2.4.1"
-  },
   "private": true,
   "workspaces": [
     "client"
