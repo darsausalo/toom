@@ -1,54 +1,206 @@
 import React from "react";
 import socket from "../socket";
+import Peer from "simple-peer";
 
 import "./UserBlock.css";
 
-import {Alert, Navbar, Card, CardDeck, Row, Col, Button, Form, ListGroup} from "react-bootstrap";
+import {Alert, Navbar, Card, CardDeck, Row, Col, Button, Form, ListGroup, Badge} from "react-bootstrap";
 import axios from "axios";
 
-function MeetingBlock({state}) {
+const videoConstraints = {
+    height: 240,
+    width: 320
+};
+
+const Video = (props) => {
+    const ref = React.useRef();
+
+    React.useEffect(() => {
+        props.peer.on("stream", stream => {
+            ref.current.srcObject = stream;
+        })
+    }, []);
+
+    return (
+        <video playsInline autoPlay ref={ref}/>
+    );
+};
+
+function VideoBlock({state}) {
+    const [peers, setPeers] = React.useState([]);
+    const socketRef = React.useRef(null);
+    const userVideo = React.useRef();
+    const peersRef = React.useRef([]);
+    const streamRef = React.useRef(null);
+
+    React.useEffect(() => {
+        socketRef.current = socket;
+        navigator.mediaDevices.getUserMedia({video: videoConstraints, audio: true}).then(stream => {
+            userVideo.current.srcObject = stream;
+            streamRef.current = stream;
+            console.log("stream:", stream);
+            socket.emit("VIDEO:JOIN", {meetingId: state.meeting._id, userId: state.user._id});
+            socketRef.current.on("VIDEO:SET_PEERS", participants => {
+                console.log("VIDEO:SET_PEERS", participants);
+                const peers = [];
+                participants.forEach(participant => {
+                    const peer = createPeer(participant.socketId, socketRef.current.id, stream);
+                    peersRef.current.push({
+                        peerID: participant.socketId,
+                        peer,
+                    })
+                    peers.push(peer);
+                })
+                setPeers(peers);
+            })
+
+            socketRef.current.on("VIDEO:STARTED", payload => {
+                const peer = addPeer(payload.signal, payload.callerID, stream);
+                peersRef.current.push({
+                    peerID: payload.callerID,
+                    peer,
+                })
+
+                setPeers(peers => [...peers, peer]);
+            });
+
+            socketRef.current.on("VIDEO:RECEIVING_RETURNED_SIGNAL", payload => {
+                const item = peersRef.current.find(p => p.peerID === payload.id);
+                item.peer.signal(payload.signal);
+            });
+
+            socketRef.current.on("MEETING:REMOVE_PARTICIPANT", participant => {
+                const item = peersRef.current.find(p => p.peerID === participant.socketId);
+                if (item) {
+                    item.peer.destroy();
+                    const id = peersRef.current.indexOf(item);
+                    peersRef.current.splice(id, 1);
+                    const newPeers = peers.filter(p => p.peerID !== item.peerID);
+                    setPeers(newPeers);
+                }
+            });
+
+        });
+
+        return function cleanup() {
+            peers.forEach(peer => peer.destroy());
+            setPeers([]);
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                });
+            }
+        }
+    }, []);
+
+    const createPeer = (userToSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: true,
+            trickle: false,
+            stream,
+        });
+
+        peer.on("signal", signal => {
+            socketRef.current.emit("VIDEO:SENDING_SIGNAL", {userToSignal, callerID, signal});
+        })
+
+        return peer;
+    }
+
+    const addPeer = (incomingSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: false,
+            trickle: false,
+            stream,
+        })
+
+        peer.on("signal", signal => {
+            socketRef.current.emit("VIDEO:RETURNING_SIGNAL", {signal, callerID});
+        })
+
+        peer.signal(incomingSignal);
+
+        return peer;
+    }
+
+    return (
+        <Col sm={8}>
+            <CardDeck>
+                <Card>
+                    <Card.Body>
+                        <video muted ref={userVideo} autoPlay playsInline/>
+                    </Card.Body>
+                </Card>
+                {peers.map((peer, index) => (
+                        <Card key={index}>
+                            <Card.Body>
+                                <Video peer={peer}/>
+                            </Card.Body>
+                        </Card>
+                    )
+                )}
+            </CardDeck>
+        </Col>
+    );
+}
+
+function MeetingBlock({state, dispatch}) {
     const [messageValue, setMessageValue] = React.useState('');
     const messagesRef = React.useRef(null);
 
     const onSendMessage = () => {
-        socket.emit("MEETING:NEW_MESSAGE", {
-           meetingId: state.meeting._id,
-           userId: state.user._id,
-           text: messageValue,
-        });
-        setMessageValue("");
+        if (messageValue.length > 0) {
+            socket.emit("MEETING:NEW_MESSAGE", {
+                meetingId: state.meeting._id,
+                userId: state.user._id,
+                text: messageValue,
+            });
+            setMessageValue("");
+        }
     };
 
     React.useEffect(() => {
         messagesRef.current.scrollTo(0, 99999);
     }, [state.messages]);
 
+    const onExit = (e) => {
+        e.preventDefault();
+        console.log("Exit!");
+        dispatch({
+            type: "MEETING:EXIT",
+        });
+        socket.emit("MEETING:EXIT");
+    };
+
+    const chatCol = state.meeting.useVideo ? 4 : 12;
+
     return (
         <div>
             <Navbar bg="light" variant="light">
                 <Navbar.Brand>{state.meeting.subject} ({state.meeting._id})</Navbar.Brand>
                 <Navbar.Collapse className="justify-content-end">
-                    <Navbar.Text>{state.user.fullname}</Navbar.Text>
+                    <Navbar.Text>{state.user.fullname} <a href="#" onClick={onExit}>[Выйти]</a></Navbar.Text>
                 </Navbar.Collapse>
             </Navbar>
             <br/>
             <Row>
-                <Col sm={8}>
-                    TODO: video
-                </Col>
-                <Col sm={4} className="justify-content-around">
+                {state.meeting.useVideo && <VideoBlock state={state}/>}
+                <Col sm={chatCol} className="justify-content-around">
                     <h5>Участники</h5>
                     <ListGroup>
-                        {state.participants.map((participant) => (
-                            <ListGroup.Item key={participant.user._id} variant={participant.user._id === state.user.id ? "info" : "light"}>{participant.user.fullname}</ListGroup.Item>
+                        {state.participants.map((participant, index) => (
+                            <ListGroup.Item key={index}
+                                            variant={participant.user._id === state.user.id ? "info" : "light"}>
+                                {participant.user.fullname}
+                            </ListGroup.Item>
                         ))}
                     </ListGroup>
                     <br/>
                     <h5>Чат</h5>
                     <div className="chat-messages">
                         <div ref={messagesRef} className="messages">
-                            {state.messages.map((message) => (
-                                <div className="message" key={message._id}>
+                            {state.messages.map((message, index) => (
+                                <div className="message" key={index}>
                                     <p>{message.text}</p>
                                     <div>
                                         <span>{message.user.fullname}</span>
@@ -79,6 +231,7 @@ function MeetingBlock({state}) {
 function JoinBlock({state, dispatch}) {
     const [subject, setSubject] = React.useState("");
     const [meetingId, setMeetingId] = React.useState("");
+    const [useVideo, setUseVideo] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState("");
     const [alertVariant, setAlertVariant] = React.useState("success");
     const [isLoading, setLoading] = React.useState(false);
@@ -101,7 +254,8 @@ function JoinBlock({state, dispatch}) {
         if (valid) {
             setLoading(true);
             try {
-                const res = await axios.create({headers: {token: state.token}}).post("/meeting", {subject});
+                console.log("useVideo:", useVideo);
+                const res = await axios.create({headers: {token: state.token}}).post("/meeting", {subject, useVideo});
                 setMeetingId(res.data._id);
                 setSubject("");
                 setAlert("Встреча успешно создана!");
@@ -188,6 +342,14 @@ function JoinBlock({state, dispatch}) {
                                     placeholder="Тема встречи"
                                 />
                             </Form.Group>
+                            <Form.Group>
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Использовать видео"
+                                    checked={useVideo}
+                                    onChange={(e) => setUseVideo(e.target.checked)}
+                                />
+                            </Form.Group>
                             <Button disabled={isLoading} variant="primary" type="submit">Создать</Button>
                         </Form>
                     </Card.Body>
@@ -214,17 +376,19 @@ function JoinBlock({state, dispatch}) {
                     </Card.Body>
                 </Card>
                 <Card className="text-center">
-                    <Card.Header as="h5">Мои втречи</Card.Header>
+                    <Card.Header as="h5">Мои встречи</Card.Header>
                     <Card.Body>
                         <Card.Text>
                             Здесь вы можете прсмотреть встречи, которые вы создали
                         </Card.Text>
-                        {state.meetings.map((meeting) => (
-                            <Card.Text className="text-left" key={meeting._id}>
-                                {meeting.subject}: {meeting._id}
+                        {state.meetings.map((meeting, index) => (
+                            <Card.Text className="text-left" key={index}>
+                                {meeting.subject}{meeting.useVideo && (
+                                <Badge variant="success">Видео</Badge>)}: {meeting._id}
+                                <br/>
                                 <Button onClick={() => onJoinMeeting(meeting._id)}>Присоединится</Button>
                             </Card.Text>
-                        ))};
+                        ))}
                     </Card.Body>
                 </Card>
             </CardDeck>

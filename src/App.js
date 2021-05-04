@@ -41,6 +41,22 @@ function App() {
         });
     };
 
+    const addParticipant = (participant) => {
+        console.log("MEETING:ADD_PARTICIPANT", participant);
+        dispatch({
+            type: "ADD_PARTICIPANT",
+            payload: {participant},
+        });
+    }
+
+    const removeParticipant = (participant) => {
+        console.log("MEETING:REMOVE_PARTICIPANT", participant);
+        dispatch({
+            type: "REMOVE_PARTICIPANT",
+            payload: {participantId: participant._id},
+        });
+    }
+
     const setMessages = (messages) => {
         dispatch({
             type: "SET_MESSAGES",
@@ -58,6 +74,8 @@ function App() {
 
     React.useEffect(() => {
         socket.on("MEETING:SET_PARTICIPANTS", setParticipants);
+        socket.on("MEETING:ADD_PARTICIPANT", addParticipant);
+        socket.on("MEETING:REMOVE_PARTICIPANT", removeParticipant);
         socket.on("MEETING:SET_MESSAGES", setMessages);
         socket.on("MEETING:ADD_MESSAGE", addMessage);
     }, []);

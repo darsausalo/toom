@@ -20,10 +20,30 @@ export default (state, action) => {
                 participants: action.payload.participants,
             }
         }
+        case "MEETING:EXIT": {
+            return {
+                ...state,
+                meeting: null,
+                participants: [],
+                messages: [],
+            }
+        }
         case "SET_PARTICIPANTS": {
             return {
                 ...state,
                 participants: action.payload.participants,
+            }
+        }
+        case "ADD_PARTICIPANT": {
+            return {
+                ...state,
+                participants: [...state.participants, action.payload.participant],
+            }
+        }
+        case "REMOVE_PARTICIPANT": {
+            return {
+                ...state,
+                participants: state.participants.filter(p => p._id !== action.payload.participantId),
             }
         }
         case "SET_MESSAGES": {
