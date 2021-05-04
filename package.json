@@ -4,6 +4,10 @@
   "engines": {
     "yarn": "2.4.1"
   },
+  "private": true,
+  "workspaces": [
+    "client"
+  ],
   "dependencies": {
     "axios": "~0.21.1",
     "bootstrap": "~4.6.0",

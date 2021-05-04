@@ -24,9 +24,7 @@ chrome-user-data
 .vscode
 *.swp
 *.swo
-.yarn
 *.lock
-.pnp.js
 
 packages/react-devtools-core/dist
 packages/react-devtools-extensions/chrome/build
@@ -44,3 +42,11 @@ packages/react-devtools-scheduling-profiler/dist
 # dotenv environment variables file
 .env
 .env.test
+
+# yarn
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
