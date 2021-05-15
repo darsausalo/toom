@@ -130,6 +130,8 @@ function SignupBlock({setAlertMessage}) {
                         type="password"
                         placeholder="Пароль"
                         value={password}
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                        title="Пароль должен сожержать как минимум одну цифру и букву в верхнем и нижнем регистре и быть не меньше 8 символов."
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </Form.Group>

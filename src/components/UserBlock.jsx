@@ -5,6 +5,7 @@ import Peer from "simple-peer";
 import "./UserBlock.css";
 
 import {Alert, Navbar, Card, CardDeck, Row, Col, Button, Form, ListGroup, Badge} from "react-bootstrap";
+import {CameraVideo, CameraVideoOff, Mic, MicMute} from "react-bootstrap-icons";
 import axios from "axios";
 
 const videoConstraints = {
@@ -18,7 +19,10 @@ const Video = (props) => {
     React.useEffect(() => {
         props.peer.on("stream", stream => {
             ref.current.srcObject = stream;
-        })
+        });
+        props.peer.on("track", (track, stream) => {
+            console.log("on track:", track);
+        });
     }, []);
 
     return (
@@ -32,6 +36,8 @@ function VideoBlock({state}) {
     const userVideo = React.useRef();
     const peersRef = React.useRef([]);
     const streamRef = React.useRef(null);
+    const [isVideoOn, setIsVideoOn] = React.useState(true);
+    const [isAudioOn, setIsAudioOn] = React.useState(true);
 
     React.useEffect(() => {
         socketRef.current = socket;
@@ -67,6 +73,10 @@ function VideoBlock({state}) {
             socketRef.current.on("VIDEO:RECEIVING_RETURNED_SIGNAL", payload => {
                 const item = peersRef.current.find(p => p.peerID === payload.id);
                 item.peer.signal(payload.signal);
+                console.log("VIDEO:RECEIVING_RETURNED_SIGNAL");
+                streamRef.current.getTracks().forEach(track => {
+                    console.log("track:", track);
+                });
             });
 
             socketRef.current.on("MEETING:REMOVE_PARTICIPANT", participant => {
@@ -123,12 +133,38 @@ function VideoBlock({state}) {
         return peer;
     }
 
+    const onToggleVideo = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => {
+                if (track.kind === "video") {
+                    track.enabled = !track.enabled;
+                    setIsVideoOn(track.enabled);
+                }
+            });
+        }
+    };
+    const onToggleAudio = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => {
+                if (track.kind === "audio") {
+                    track.enabled = !track.enabled;
+                    setIsAudioOn(track.enabled);
+                }
+            });
+        }
+    };
+
     return (
         <Col sm={8}>
             <CardDeck>
                 <Card>
                     <Card.Body>
                         <video muted ref={userVideo} autoPlay playsInline/>
+                        <br/>
+                        {isVideoOn && <CameraVideo size={24} onClick={onToggleVideo} cursor="pointer"/>}
+                        {!isVideoOn && <CameraVideoOff size={24} onClick={onToggleVideo} cursor="pointer"/>}
+                        {isAudioOn && <Mic size={24} onClick={onToggleAudio} cursor="pointer"/>}
+                        {!isAudioOn && <MicMute size={24} onClick={onToggleAudio} cursor="pointer"/>}
                     </Card.Body>
                 </Card>
                 {peers.map((peer, index) => (
@@ -201,8 +237,9 @@ function MeetingBlock({state, dispatch}) {
                         <div ref={messagesRef} className="messages">
                             {state.messages.map((message, index) => (
                                 <div className="message" key={index}>
-                                    <p>{message.text}</p>
+                                    <p className={message.user._id === state.user._id ? "my" : ""}>{message.text}</p>
                                     <div>
+                                        <span>{new Date(message.createdAt).toLocaleTimeString()}: </span>
                                         <span>{message.user.fullname}</span>
                                     </div>
                                 </div>

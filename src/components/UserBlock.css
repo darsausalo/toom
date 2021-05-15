@@ -27,6 +27,10 @@
     margin-bottom: 2px;
 }
 
+.message p.my {
+    background-color: coral;
+}
+
 .message span {
     opacity: 0.5;
     font-size: 14px;

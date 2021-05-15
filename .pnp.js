@@ -44,6 +44,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lodash", "npm:4.17.21"],
             ["react", "npm:17.0.2"],
             ["react-bootstrap", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.2"],
+            ["react-bootstrap-icons", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.0"],
             ["react-dom", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:17.0.2"],
             ["react-scripts", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:4.0.3"],
             ["simple-peer", "npm:9.11.0"],
@@ -16875,6 +16876,29 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["react-bootstrap-icons", [
+        ["npm:1.5.0", {
+          "packageLocation": "./.yarn/cache/react-bootstrap-icons-npm-1.5.0-2fae1984a9-561c962854.zip/node_modules/react-bootstrap-icons/",
+          "packageDependencies": [
+            ["react-bootstrap-icons", "npm:1.5.0"]
+          ],
+          "linkType": "SOFT",
+        }],
+        ["virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.0", {
+          "packageLocation": "./.yarn/$$virtual/react-bootstrap-icons-virtual-57ad819b96/0/cache/react-bootstrap-icons-npm-1.5.0-2fae1984a9-561c962854.zip/node_modules/react-bootstrap-icons/",
+          "packageDependencies": [
+            ["react-bootstrap-icons", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.0"],
+            ["@types/react", null],
+            ["prop-types", "npm:15.7.2"],
+            ["react", "npm:17.0.2"]
+          ],
+          "packagePeers": [
+            "@types/react",
+            "react"
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["react-dev-utils", [
         ["npm:11.0.4", {
           "packageLocation": "./.yarn/cache/react-dev-utils-npm-11.0.4-3a3d727f29-8872312144.zip/node_modules/react-dev-utils/",
@@ -19430,6 +19454,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lodash", "npm:4.17.21"],
             ["react", "npm:17.0.2"],
             ["react-bootstrap", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.2"],
+            ["react-bootstrap-icons", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:1.5.0"],
             ["react-dom", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:17.0.2"],
             ["react-scripts", "virtual:22046595fe75cf7b5cc9fc74e5ebf2a70bfd311f3c3f7bd46c57edf407b2d50fe60e0f11e1264808e522ec8cf31a9bd81e4a9b47dfc1cfa96f00a3fc21a7501e#npm:4.0.3"],
             ["simple-peer", "npm:9.11.0"],
